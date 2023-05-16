@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AuthenticationController;
+use App\Http\Controllers\CommentController;
 use App\Http\Controllers\PostController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -18,7 +19,13 @@ use Illuminate\Support\Facades\Route;
 
 Route::get('/posts', [PostController::class, 'index']);
 Route::get('/posts/{id}', [PostController::class, 'show']);
-Route::get('/posts/2/{id}', [PostController::class, 'show2']);
+Route::post('/posts', [PostController::class, 'store']);
+Route::patch('/posts/{id}', [PostController::class, 'edit']);
+Route::post('/posts/comment', [CommentController::class, 'store']);
+Route::delete('/posts/{id}', [PostController::class, 'delete']);
+Route::patch('/posts/comment/{id}', [CommentController::class, 'edit']);
+Route::delete('/posts/comment/{id}', [CommentController::class, 'destroy']);
+// Route::get('/posts/2/{id}', [PostController::class, 'show2']);
 
 Route::post('/login', [AuthenticationController::class, 'login']);
 Route::get('/logout', [AuthenticationController::class, 'logout']);

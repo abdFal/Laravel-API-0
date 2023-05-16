@@ -15,13 +15,15 @@ class NewsDetailResource extends JsonResource
     public function toArray(Request $request): array
     {
         return [
-            'id' => $this->id,
+            'post_id' => $this->id,
             'title' => $this->title,
             'writer' => $this->whenLoaded('writer', function(){
                 return $this->writer['username'];
             }),
             'news_content' => $this->news_content,
             'created_at' => date_format($this->created_at, 'Y-m-d H:i'),
+            'total_comments' => $this->comments->count(),
+            'isi_comment' => CommentResource::collection($this->comments)
         ];
     }
 }
