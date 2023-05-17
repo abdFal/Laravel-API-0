@@ -5,8 +5,10 @@ namespace App\Http\Controllers;
 use App\Http\Resources\NewsDetailResource;
 use App\Http\Resources\NewsResource;
 use App\Models\post;
+use Illuminate\Http\File;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
 
 class PostController extends Controller
 {
@@ -34,18 +36,42 @@ class PostController extends Controller
         return new NewsDetailResource($news);
     }
 
+    function generateRandomString($length = 20) {
+    $characters = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
+    $charactersLength = strlen($characters);
+    $randomString = '';
+    for ($i = 0; $i < $length; $i++) {
+        $randomString .= $characters[random_int(0, $charactersLength - 1)];
+    }
+    return $randomString;
+    }
+
     public function store(Request $request )
     {
         $validated = $request->validate([
             'title' => 'required',
-            'news_content' => 'required|max:500'
+            'news_content' => 'required|max:500',
+            
         ]);
 
-        $post=post::create([
-            'title' => $request->input('title'),
-            'news_content' => $request->input('news_content'),
-            'author' => Auth::user()->id,
-        ]);
+        if($request->file){
+            $validated = $request->validate([
+                'file' => 'mimes:png,jpg,jpeg|max:100000'
+            ]);
+
+            $fileName = $this->generateRandomString();
+            $extension = $request->file->extension();
+
+            Storage::putFileAs('images', $request->file, $fileName. '.'. $extension);
+
+            $request['image'] = $fileName . '.'. $extension;
+            $request['author'] = Auth::user()->id;
+            $post = post::create($request->all());
+        }
+
+        
+        $request['author'] = Auth::user()->id;
+        $post = post::create($request->all());
 
         return new NewsDetailResource($post->loadMissing('writer'));
     }
